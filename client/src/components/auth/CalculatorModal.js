@@ -1,16 +1,7 @@
 import React, { Component } from "react";
 import uuid4 from "uuid4";
-import { throwStatement } from "@babel/types";
 import axios from "axios";
-import {
-  Container,
-  Row,
-  Col,
-  FormGroup,
-  Label,
-  Input,
-  Button
-} from "reactstrap";
+import { Container, Row, Col, Input, Button, Alert } from "reactstrap";
 import { connect } from "react-redux";
 import { transferCalculatorResults } from "../../actions/fatLogActions";
 import Image from "react-bootstrap/Image";
@@ -33,7 +24,8 @@ class fatSearch extends Component {
       gramsFat: "",
       errored: false,
       imageAddress:
-        "https://i.etsystatic.com/10919371/r/il/c45e4e/1683722024/il_570xN.1683722024_e199.jpg"
+        "https://i.etsystatic.com/10919371/r/il/c45e4e/1683722024/il_570xN.1683722024_e199.jpg",
+      error: ""
     };
     this.onChangeFood = this.onChangeFood.bind(this);
     this.onChangeMeasures = this.onChangeMeasures.bind(this);
@@ -49,7 +41,7 @@ class fatSearch extends Component {
 
   onChangeFood = e => {
     let indexOfSelectedVar = this.state.apiResponse.hints.findIndex(
-      obj => obj.food.label == e.target.value
+      obj => obj.food.label === e.target.value
     );
 
     this.setState({
@@ -71,7 +63,7 @@ class fatSearch extends Component {
 
   onChangeMeasures = e => {
     let indexOfSelectedMeasure = this.state.selectedObjectMeasures.findIndex(
-      obj => obj.label == e.target.value
+      obj => obj.label === e.target.value
     );
 
     this.setState({
@@ -91,9 +83,7 @@ class fatSearch extends Component {
     });
   };
 
-  componentDidMount() {
-    let test = "test";
-  }
+  componentDidMount() {}
 
   async getData() {
     let url = `https://api.edamam.com/api/food-database/parser?nutrition-type=logging&ingr=${this.state.encodedSearchTerm}&app_id=e9e86788&app_key=2c231e68f3531783f0fed14057834b04`;
@@ -102,8 +92,6 @@ class fatSearch extends Component {
     let dataJSON = await response.json();
 
     this.setState({ apiResponse: dataJSON });
-    console.log(dataJSON);
-    console.log(this.state.apiResponse.hints[0]);
 
     this.setState({
       measure: this.state.apiResponse.hints[0].measures,
@@ -151,13 +139,20 @@ class fatSearch extends Component {
   };
 
   transfer = (cFood, cUnit, cQuantity, cFat) => {
-    this.props.transferCalculatorResults(cFood, cUnit, cQuantity, cFat);
+    if (!cFood || !cUnit || !cQuantity || !cFat) {
+      this.setState({ error: "Please complete all fields" });
+    } else {
+      this.props.transferCalculatorResults(cFood, cUnit, cQuantity, cFat);
+    }
   };
 
   render() {
     return (
       <div>
         <div className="form-group">
+          {this.state.error ? (
+            <Alert color="danger">{this.state.error}</Alert>
+          ) : null}
           <label>Enter Food Search Term: </label>
           <input
             type="string"
@@ -232,16 +227,18 @@ class fatSearch extends Component {
               this.state.gramsFat ? "grams" : " "
             }`}
           ></Input>
+          <br />
           <div className="form-group">
             <Button
-              onClick={() =>
+              onClick={() => {
                 this.transfer(
                   this.state.selected,
                   this.state.selectedMeasure,
                   this.state.numberOfUnits,
                   this.state.gramsFat
-                )
-              }
+                );
+                this.state.error && this.props.closeModal();
+              }}
               size="md"
             >
               Transfer data to new log

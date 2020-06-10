@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { getFatLogs, deleteFatLog } from "../actions/fatLogActions";
 import { loadUser } from "../actions/authActions";
 import PropTypes from "prop-types";
-import store from "../store";
+import moment from "moment";
 
 class FatLogsList extends Component {
   static propTypes = {
@@ -17,8 +17,6 @@ class FatLogsList extends Component {
 
   componentDidMount() {
     this.props.getFatLogs(this.props.username);
-    //this.putUserIntoState();
-    console.log(this.props.username);
   }
 
   /*putUserIntoState = () => {
@@ -32,11 +30,12 @@ class FatLogsList extends Component {
   };
 
   render() {
-    const { user } = this.props.auth;
     const { fatLogs } = this.props.fatLog;
+
     return (
       <Container>
         {/*user ? user.name : null */}
+
         <ListGroup>
           <TransitionGroup className="fatLogs-list">
             {fatLogs.map(
@@ -76,7 +75,10 @@ class FatLogsList extends Component {
                       </FormGroup>
                       <FormGroup>
                         <Label for="fatLog">Date</Label>
-                        <Input type="text" value={date} readOnly />
+                        <Input
+                          value={moment(date).format("LLLL")}
+                          readOnly
+                        ></Input>
                       </FormGroup>
                       <FormGroup>
                         <Label for="fatLog">Meal</Label>

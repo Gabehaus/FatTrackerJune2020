@@ -7,7 +7,8 @@ import {
   CHANGE_CALCFOOD,
   CHANGE_CALCUNIT,
   CHANGE_CALCQUANTITY,
-  CHANGE_CALCFAT
+  CHANGE_CALCFAT,
+  RESET_LOGADDED
 } from "../actions/types";
 
 const initialState = {
@@ -18,7 +19,7 @@ const initialState = {
   calcFood: "hamburger",
   calcUnit: "whole",
   calcQuantity: "1",
-  calcFat: "10",
+  calcFat: "0",
   newLogAdded: false
 };
 
@@ -75,6 +76,11 @@ export default function(state = initialState, action) {
       return {
         ...state,
         calcFat: action.payload
+      };
+    case RESET_LOGADDED:
+      return {
+        ...state,
+        newLogAdded: false
       };
     default:
       return state;

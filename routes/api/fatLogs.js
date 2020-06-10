@@ -9,7 +9,9 @@ const FatLog = require("../../models/FatLog");
 //@desc Get ALL Items
 // @access Public
 router.get("/:username", (req, res) => {
-  FatLog.find({ username: req.params.username })
+  FatLog.find({
+    username: req.params.username
+  })
     .sort({ date: -1 })
     .then(fatLogs => res.json(fatLogs));
 });
@@ -26,6 +28,10 @@ router.post("/", auth, (req, res) => {
   const fat = req.body.fat;
   const date = Date.parse(req.body.date);
   const meal = req.body.meal;
+
+  if (!food || !unit || !quantity || !fat || !date || !meal) {
+    return res.status(400).json({ msg: "Please enter all fields" });
+  }
 
   const newFatLog = new FatLog({
     username,

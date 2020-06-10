@@ -7,7 +7,8 @@ import {
   CHANGE_CALCFOOD,
   CHANGE_CALCUNIT,
   CHANGE_CALCQUANTITY,
-  CHANGE_CALCFAT
+  CHANGE_CALCFAT,
+  RESET_LOGADDED
 } from "./types";
 import axios from "axios";
 import { tokenConfig } from "./authActions";
@@ -37,7 +38,9 @@ export const addFatLog = (fatLog, getState) => dispatch => {
       })
     )
     .catch(err =>
-      dispatch(returnErrors(err.response.data, err.response.status))
+      dispatch(
+        returnErrors(err.response.data, err.response.status, "ADD_FATLOG_FAIL")
+      )
     );
 };
 
@@ -96,5 +99,11 @@ export const changeCalcFat = fat => {
   return {
     type: CHANGE_CALCFAT,
     payload: fat
+  };
+};
+
+export const resetFatLogAdded = () => {
+  return {
+    type: RESET_LOGADDED
   };
 };

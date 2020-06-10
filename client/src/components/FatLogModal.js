@@ -8,9 +8,9 @@ import {
   ModalFooter,
   Form,
   FormGroup,
-  FormText,
   Label,
-  Input
+  Input,
+  Alert
 } from "reactstrap";
 import { connect } from "react-redux";
 import {
@@ -18,7 +18,8 @@ import {
   changeCalcFood,
   changeCalcUnit,
   changeCalcQuantity,
-  changeCalcFat
+  changeCalcFat,
+  resetFatLogAdded
 } from "../actions/fatLogActions";
 import PropTypes from "prop-types";
 import DatePicker from "react-datepicker";
@@ -36,16 +37,41 @@ class FatLogModal extends Component {
     fat: this.props.fatLog.calcFat,
     food: this.props.fatLog.calcFood,
     unit: this.props.fatLog.calcUnit,
-    quantity: this.props.fatLog.calcQuantity
+    quantity: this.props.fatLog.calcQuantity,
+    logAdded: this.props.fatLog.newLogAdded
   };
 
   static propTypes = {
     isAuthenticated: PropTypes.bool
   };
 
+  componentDidUpdate(prevProps, prevState) {
+    const { error, fatLog } = this.props;
+    if (error !== prevProps.error) {
+      //Check for fatLog error
+      if (error.id === "ADD_FATLOG_FAIL") {
+        this.setState({ msg: error.msg.msg });
+      } else {
+        this.setState({ msg: null });
+      }
+    }
+    if (fatLog.newLogAdded !== prevProps.fatLog.newLogAdded) {
+      this.setState({
+        modal: false,
+        msg: null,
+        logAdded: false
+      });
+      this.props.resetFatLogAdded();
+    }
+    if (this.state.date !== prevState.date) {
+      console.log(this.state.date);
+    }
+  }
+
   toggle = () => {
     this.setState({
-      modal: !this.state.modal
+      modal: !this.state.modal,
+      msg: null
     });
   };
 
@@ -86,6 +112,23 @@ class FatLogModal extends Component {
     this.props.changeCalcFat(e.target.value);
     this.setState({ fat: this.props.fatLog.calcFat });
   };
+  /*
+  onChangeDate = date => {
+    var string = Date(date);
+    var diff = string.slice(29, 31); //difference between local time and GMT in hours
+
+    var adjusted = moment(date) //sets local time back before storing in Database as UTC - UTC will appear as local time in database now
+      .subtract(diff, "hours")
+      .toString();
+
+    var answer = new Date(adjusted);
+
+    this.setState({
+      date: answer
+    });
+
+    console.log(answer);
+  };  */
 
   onChangeDate = date => {
     this.setState({
@@ -109,10 +152,11 @@ class FatLogModal extends Component {
     // Add item via addItem action
     this.props.addFatLog(newFatLog);
     // Close modal
-    this.props.fatLog.newLogAdded && this.toggle();
   }
 
   render() {
+    //const { newLogAdded } = this.props.fatLog;
+
     return (
       <div>
         {this.props.isAuthenticated ? (
@@ -132,6 +176,9 @@ class FatLogModal extends Component {
             Add To Fat Consumption Logs
           </ModalHeader>
           <ModalBody>
+            {this.state.msg ? (
+              <Alert color="danger">{this.state.msg}</Alert>
+            ) : null}
             <Form onSubmit={this.onSubmit.bind(this)}>
               <FormGroup>
                 <Label for="fatLog">Food</Label>
@@ -198,7 +245,7 @@ class FatLogModal extends Component {
                 </Input>
               </FormGroup>
               <FormGroup>
-                <Label for="fat">Fat Content</Label>
+                <Label for="fat">Fat Content In Grams</Label>
                 <Input
                   type="number"
                   step="any"
@@ -219,21 +266,21 @@ class FatLogModal extends Component {
               >
                 <ModalHeader>Fat Content Calculator</ModalHeader>
                 <ModalBody>
-                  <CalculatorModal />
+                  <CalculatorModal closeModal={this.toggleNested} />
                 </ModalBody>
                 <ModalFooter>
                   <Button color="primary" onClick={this.toggleNested}>
-                    Done
+                    Back
                   </Button>{" "}
                   <Button color="secondary" onClick={this.toggleAll}>
-                    All Done
+                    Exit All
                   </Button>
                 </ModalFooter>
               </Modal>
               <br />
               <br />
               <FormGroup>
-                <Label>My Date Picker</Label>
+                <Label>Date </Label>
                 <DatePicker
                   selected={this.state.date}
                   onChange={this.onChangeDate}
@@ -253,7 +300,8 @@ class FatLogModal extends Component {
 const mapStateToProps = state => ({
   fatLog: state.fatLog,
   isAuthenticated: state.auth.isAuthenticated,
-  user: state.auth.user
+  user: state.auth.user,
+  error: state.error
 });
 
 export default connect(mapStateToProps, {
@@ -261,5 +309,6 @@ export default connect(mapStateToProps, {
   changeCalcFood,
   changeCalcQuantity,
   changeCalcUnit,
-  changeCalcFat
+  changeCalcFat,
+  resetFatLogAdded
 })(FatLogModal);
