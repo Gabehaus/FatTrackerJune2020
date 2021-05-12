@@ -8,7 +8,7 @@
     "@testing-library/user-event": "^7.2.1",
     "bcryptjs": "^2.4.3",
     "canvasjs": "^1.8.3",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "mdbreact": "^4.27.0",
     "moment": "^2.26.0",
     "moment-timezone": "^0.5.31",
